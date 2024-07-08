@@ -18,6 +18,24 @@ RUN apt-get update && \
     unzip && \ 
     apt-get clean
 
+# Install Miniconda
+WORKDIR /opt
+#RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh -O miniconda.sh && \
+    bash miniconda.sh -b -p /opt/miniconda && \
+    rm miniconda.sh
+
+# Set up the conda environment
+ENV PATH="/opt/miniconda/bin:$PATH"
+RUN conda init && \
+    conda config --set auto_activate_base false
+
+# Ensure conda is available in non-interactive shells
+RUN echo "source /opt/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
+
+# Install Pytorch
+RUN conda install pytorch cpuonly -c pytorch
+
 ########################
 # Install GCC, Fortran #
 ########################
@@ -53,3 +71,5 @@ RUN cmake .. \
     -DCMAKE_CXX_COMPILER=g++ \
     -DCMAKE_PREFIX_PATH=/opt/libtorch \
     -DCMAKE_INSTALL_PREFIX=~/FTorchbin
+
+WORKDIR /
