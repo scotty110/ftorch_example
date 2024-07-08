@@ -70,6 +70,8 @@ RUN cmake .. \
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
     -DCMAKE_PREFIX_PATH=/opt/libtorch \
-    -DCMAKE_INSTALL_PREFIX=~/FTorchbin
+    -DCMAKE_INSTALL_PREFIX=/usr/local/ftorch
+
+RUN make && make install
 
 WORKDIR /
