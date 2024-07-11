@@ -33,9 +33,6 @@ RUN conda init && \
 # Ensure conda is available in non-interactive shells
 RUN echo "source /opt/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
 
-# Install Pytorch
-RUN conda install pytorch cpuonly -c pytorch
-
 ########################
 # Install GCC, Fortran #
 ########################
@@ -53,11 +50,15 @@ RUN ln -s /usr/bin/gfortran-9 /usr/bin/gfortran
 # Install Torch, FTorch #
 #########################
 
-# Install LibTorch
-WORKDIR /opt
-RUN wget https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-2.3.1%2Bcpu.zip -O libtorch.zip && \
-    unzip libtorch.zip && \
-    rm libtorch.zip
+# Need to build LibTorch from Source (https://github.com/pytorch/pytorch/blob/main/docs/libtorch.rst#building-libtorch-using-cmake)
+WORKDIR /opt 
+RUN git clone -b main --recurse-submodule https://github.com/pytorch/pytorch.git
+
+WORKDIR /opt/pytorch_build
+RUN conda install -y pyyaml typing_extensions numpy 
+RUN cmake -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE:STRING=Release -DPYTHON_EXECUTABLE:PATH=`which python3` -DCMAKE_INSTALL_PREFIX:PATH=../libtorch ../pytorch
+RUN cmake --build . --target install 
+
 
 # Install FTorch
 WORKDIR /opt
@@ -70,7 +71,7 @@ RUN cmake .. \
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
     -DCMAKE_PREFIX_PATH=/opt/libtorch \
-    -DCMAKE_INSTALL_PREFIX=/usr/local/ftorch
+    -DCMAKE_INSTALL_PREFIX=/opt/libtorch/
 
 RUN make && make install
 
