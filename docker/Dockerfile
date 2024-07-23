@@ -79,4 +79,7 @@ RUN cmake .. \
 
 RUN make && make install
 
+# Add To LD_PATH
+ENV LD_LIBRARY_PATH=/usr/local/ftorch/lib:$LD_LIBRARY_PATH 
+
 WORKDIR /

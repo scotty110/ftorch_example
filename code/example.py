@@ -43,10 +43,11 @@ class SimpleNet(nn.Module):
 
 if __name__ == "__main__":
     model = SimpleNet()
-    model.eval()
 
+    model.eval()
     with torch.no_grad():
         print(model(torch.Tensor([0.0, 1.0, 2.0, 3.0, 4.0])))
 
     # Save the model
-    torch.save(model.state_dict(), "/weights/simple_net.pth")
+    script_model = torch.jit.script(model)
+    script_model.save("/weights/simple_net.pt")
