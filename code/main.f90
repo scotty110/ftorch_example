@@ -37,11 +37,17 @@ program inference
     in_data = [0.0, 1.0, 2.0, 3.0, 4.0]
  
     ! Create Torch input/output tensors from the above arrays
-    call torch_tensor_from_array(in_tensors(1), in_data, tensor_layout, torch_kCPU)
-    call torch_tensor_from_array(out_tensors(1), out_data, tensor_layout, torch_kCPU)
+
+    ! CPU
+    !call torch_tensor_from_array(in_tensors(1), in_data, tensor_layout, torch_kCPU)
+    !call torch_tensor_from_array(out_tensors(1), out_data, tensor_layout, torch_kCPU)
+    
+    call torch_tensor_from_array(in_tensors(1), in_data, tensor_layout, torch_kCUDA, device_index=0)
+    call torch_tensor_from_array(out_tensors(1), out_data, tensor_layout, torch_kCUDA, device_index=0)
+ 
  
     ! Load ML model
-    call torch_model_load(model, args(1))
+    call torch_model_load(model, args(1), device_type=torch_kCUDA, device_index=0)
  
     ! Infer
     call torch_model_forward(model, in_tensors, out_tensors)

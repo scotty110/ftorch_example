@@ -74,6 +74,8 @@ RUN cmake .. \
     -DCMAKE_Fortran_COMPILER=gfortran \
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
+    -DUSE_CUDA=ON \
+    -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-12.4 \
     -DCMAKE_PREFIX_PATH=/opt/libtorch \
     -DCMAKE_INSTALL_PREFIX=/usr/local/ftorch
 
