@@ -60,9 +60,15 @@ RUN git clone -b main --recurse-submodule https://github.com/pytorch/pytorch.git
 
 WORKDIR /opt/pytorch_build
 RUN conda install -y pyyaml typing_extensions numpy 
-RUN cmake -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE:STRING=Release -DPYTHON_EXECUTABLE:PATH=`which python3` -DCMAKE_INSTALL_PREFIX:PATH=../libtorch ../pytorch
-#RUN cmake --build . --target install 
-RUN cmake --build . --target install -- -j $(nproc)
+RUN cmake -DBUILD_SHARED_LIBS:BOOL=ON \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DPYTHON_EXECUTABLE:PATH=`which python3` \
+    -DUSE_CUDA=ON \
+    -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-12.4 \
+    -DCMAKE_INSTALL_PREFIX:PATH=../libtorch \
+    ../pytorch
+RUN cmake --build . --target install 
+#RUN cmake --build . --target install -- -j $(nproc)
 
 # Install FTorch
 WORKDIR /opt
