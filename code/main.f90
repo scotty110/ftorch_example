@@ -30,10 +30,19 @@ program inference
     type(torch_tensor), dimension(1) :: in_tensors
     type(torch_tensor), dimension(1) :: out_tensors
 
+    ! Get TorchScript model file as a command line argument
+    num_args = command_argument_count()
+    allocate(args(num_args))
+    do ix = 1, num_args
+        call get_command_argument(ix, args(ix))
+    end do
+
     ! Initialise data
     do i = 1, array_len
         in_data(i) = real(i, wp)
     end do
+
+    write(*,*) 'Loading model...'
 
     ! Load the Model
     call torch_model_load(model, args(1)) 
