@@ -60,9 +60,23 @@ RUN git clone -b main --recurse-submodule https://github.com/pytorch/pytorch.git
 
 WORKDIR /opt/pytorch_build
 RUN conda install -y pyyaml typing_extensions numpy 
-RUN cmake -DBUILD_SHARED_LIBS:BOOL=ON -DCMAKE_BUILD_TYPE:STRING=Release -DPYTHON_EXECUTABLE:PATH=`which python3` -DCMAKE_INSTALL_PREFIX:PATH=../libtorch ../pytorch
-RUN cmake --build . --target install 
-#RUN cmake --build . --target install -- -j $(nproc)
+
+# Set environment variables for CUDA
+ENV CUDA_HOME=/usr/local/cuda
+ENV CUDNN_INCLUDE_DIR=/usr/local/cuda/include
+ENV CUDNN_LIB_DIR=/usr/local/cuda/lib64
+
+# Build PyTorch with CUDA support
+RUN cmake -DBUILD_SHARED_LIBS:BOOL=ON \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DPYTHON_EXECUTABLE:PATH=`which python3` \
+    -DUSE_CUDA=ON \
+    -DCUDA_TOOLKIT_ROOT_DIR=$CUDA_HOME \
+    -DCMAKE_INSTALL_PREFIX:PATH=../libtorch \
+    ../pytorch
+
+#RUN cmake --build . --target install 
+RUN cmake --build . --target install -- -j $(nproc)
 
 # Install FTorch
 WORKDIR /opt
@@ -74,6 +88,10 @@ RUN cmake .. \
     -DCMAKE_Fortran_COMPILER=gfortran \
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
+    -DUSE_CUDA=ON \
+    -DCUDA_BIN_PATH=/usr/local/cuda/bin \
+    -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda \
+    -DCUDA_LIB_DIR=/usr/local/cuda/lib64 \
     -DCMAKE_PREFIX_PATH=/opt/libtorch \
     -DCMAKE_INSTALL_PREFIX=/usr/local/ftorch
 
@@ -81,5 +99,6 @@ RUN make && make install
 
 # Add To LD_PATH
 ENV LD_LIBRARY_PATH=/usr/local/ftorch/lib:$LD_LIBRARY_PATH 
+ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/cuda/"
 
-WORKDIR /
+WORKDIR /code

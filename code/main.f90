@@ -2,60 +2,63 @@
 program inference
 
     ! Import precision info from iso
-    use, intrinsic :: iso_fortran_env, only : sp => real32
- 
+    use, intrinsic :: iso_fortran_env, only : sp => real32, dp => real64
+
     ! Import our library for interfacing with PyTorch
     use ftorch
- 
+
     implicit none
-   
+
     ! Set working precision for reals
-    integer, parameter :: wp = sp
-    
+    integer, parameter :: wp = dp
+    integer :: i
+
     integer :: num_args, ix
     character(len=128), dimension(:), allocatable :: args
- 
+
     ! Set up Fortran data structures
-    real(wp), dimension(5), target :: in_data
-    real(wp), dimension(5), target :: out_data
+    integer, parameter :: array_len = 852
+    real(wp) :: in_data(array_len)
+
+    real(wp), dimension(560), target :: out_data
+
     integer :: tensor_layout(1) = [1]
- 
+
     ! Set up Torch data structures
     ! The net, a vector of input tensors (in this case we only have one), and the output tensor
     type(torch_model) :: model
     type(torch_tensor), dimension(1) :: in_tensors
     type(torch_tensor), dimension(1) :: out_tensors
- 
+
     ! Get TorchScript model file as a command line argument
     num_args = command_argument_count()
     allocate(args(num_args))
     do ix = 1, num_args
-        call get_command_argument(ix,args(ix))
+        call get_command_argument(ix, args(ix))
     end do
- 
-    ! Initialise data
-    in_data = [0.0, 1.0, 2.0, 3.0, 4.0]
- 
-    ! Create Torch input/output tensors from the above arrays
 
-    ! CPU
-    !call torch_tensor_from_array(in_tensors(1), in_data, tensor_layout, torch_kCPU)
-    !call torch_tensor_from_array(out_tensors(1), out_data, tensor_layout, torch_kCPU)
-    
+    ! Initialise data
+    do i = 1, array_len
+        in_data(i) = real(i, wp)
+    end do
+
+    write(*,*) 'Loading model...'
+
+    ! Load the Model
+    call torch_model_load(model, args(1), torch_kCUDA, device_index=0) 
+
+    write(*,*) 'Running inference...'
+
+    ! Push data
     call torch_tensor_from_array(in_tensors(1), in_data, tensor_layout, torch_kCUDA, device_index=0)
-    call torch_tensor_from_array(out_tensors(1), out_data, tensor_layout, torch_kCUDA, device_index=0)
- 
- 
-    ! Load ML model
-    call torch_model_load(model, args(1), device_type=torch_kCUDA, device_index=0)
- 
-    ! Infer
+    call torch_tensor_from_array(out_tensors(1), out_data, tensor_layout, torch_kCPU)
+
+    ! Run the model
     call torch_model_forward(model, in_tensors, out_tensors)
-    write (*,*) out_data(:)
- 
-    ! Cleanup
+
+    write(*,*) out_data(:)
     call torch_model_delete(model)
     call torch_tensor_delete(in_tensors(1))
     call torch_tensor_delete(out_tensors(1))
- 
- end program inference
+
+end program inference
