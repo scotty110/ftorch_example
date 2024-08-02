@@ -35,7 +35,7 @@ RUN conda init && \
 RUN echo "source /opt/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
 
 # Install Pytorch
-RUN conda install pytorch pytorch-cuda=12.1 -c pytorch -c nvidia
+RUN conda install -y pytorch pytorch-cuda=12.1 -c pytorch -c nvidia
 
 ########################
 # Install GCC, Fortran #
@@ -76,7 +76,7 @@ RUN cmake -DBUILD_SHARED_LIBS:BOOL=ON \
     ../pytorch
 
 #RUN cmake --build . --target install 
-RUN cmake --build . --target install -- -j $(nproc)
+RUN cmake --build . --target install 
 
 # Install FTorch
 WORKDIR /opt

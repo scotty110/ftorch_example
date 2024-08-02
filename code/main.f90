@@ -45,12 +45,14 @@ program inference
     write(*,*) 'Loading model...'
 
     ! Load the Model
-    call torch_model_load(model, args(1), torch_kCUDA, device_index=0) 
+    !call torch_model_load(model, args(1), torch_kCUDA, device_index=0) 
+    call torch_model_load(model, args(1), torch_kCUDA)
 
     write(*,*) 'Running inference...'
 
     ! Push data
-    call torch_tensor_from_array(in_tensors(1), in_data, tensor_layout, torch_kCUDA, device_index=0)
+    !call torch_tensor_from_array(in_tensors(1), in_data, tensor_layout, torch_kCUDA, device_index=0)
+    call torch_tensor_from_array(in_tensors(1), in_data, tensor_layout, torch_kCUDA)
     call torch_tensor_from_array(out_tensors(1), out_data, tensor_layout, torch_kCPU)
 
     ! Run the model

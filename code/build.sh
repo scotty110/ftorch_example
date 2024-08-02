@@ -1,3 +1,10 @@
 #!/bin/bash
 
-gfortran -o ./ftorch_example ./main.f90 -I/usr/local/ftorch/include/ftorch -L/usr/local/ftorch/lib -lftorch
+set -eu
+
+mkdir build
+cd build
+cmake .. -DCMAKE_PREFIX_PATH=./ -DCMAKE_BUILD_TYPE=Release
+cmake --build .
+
+./ftorch_gpu /weights/simple_net.pt

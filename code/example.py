@@ -43,10 +43,13 @@ class SimpleNet(nn.Module):
 
 if __name__ == "__main__":
     model = SimpleNet()
+    model = model.to(device="cuda", dtype=torch.float64)
 
     model.eval()
     with torch.no_grad():
-        print(model(torch.Tensor([0.0, 1.0, 2.0, 3.0, 4.0])))
+        input_tensor = torch.tensor([0.0, 1.0, 2.0, 3.0, 4.0], dtype=torch.float64).to("cuda")
+        # Forward pass
+        print(model(input_tensor))
 
     # Save the model
     script_model = torch.jit.script(model)

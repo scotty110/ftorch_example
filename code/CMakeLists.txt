@@ -11,9 +11,20 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
 endif()
 
+set(CMAKE_PREFIX_PATH "/opt/libtorch")
+
 find_package(FTorch)
 message(STATUS "Building with Fortran PyTorch coupling")
 
 # Fortran example
 add_executable(ftorch_gpu main.f90)
-target_link_libraries(main PRIVATE FTorch::ftorch)
+target_link_libraries(ftorch_gpu PRIVATE FTorch::ftorch)
+
+# Additional steps to ensure GPU support
+find_package(Torch REQUIRED)
+
+# Link the Torch libraries to your target
+target_link_libraries(ftorch_gpu PRIVATE ${TORCH_LIBRARIES})
+
+# Ensure that the C++14 standard is used (required by PyTorch)
+set_property(TARGET ftorch_gpu PROPERTY CXX_STANDARD 14)
