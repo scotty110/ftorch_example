@@ -36,7 +36,8 @@ RUN conda init && \
 RUN echo "source /opt/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
 
 # Install Pytorch
-RUN conda install -y pytorch pytorch-cuda=12.1 -c pytorch -c nvidia
+#RUN conda install -y pytorch pytorch-cuda=12.1 -c pytorch -c nvidia
+RUN conda install -y pyyaml typing_extensions numpy 
 
 #########################
 # Install Torch, FTorch #
@@ -48,9 +49,12 @@ RUN conda install -y pytorch pytorch-cuda=12.1 -c pytorch -c nvidia
 # https://github.com/pytorch/pytorch/archive/refs/tags/v2.1.2.tar.gz
 WORKDIR /opt 
 RUN git clone -b main --recurse-submodule https://github.com/pytorch/pytorch.git
+#RUN wget https://github.com/pytorch/pytorch/archive/refs/tags/v2.4.0.tar.gz && \
+#    tar -xvf v2.4.0.tar.gz && \
+#    rm v2.4.0.tar.gz && \
+#    mv pytorch-2.4.0 pytorch
 
-WORKDIR /opt/pytorch_build
-RUN conda install -y pyyaml typing_extensions numpy 
+WORKDIR /opt/pytorch/build
 
 # Set environment variables for CUDA
 ENV CUDA_HOME=/usr/local/cuda
@@ -63,11 +67,11 @@ RUN cmake -DBUILD_SHARED_LIBS:BOOL=ON \
     -DPYTHON_EXECUTABLE:PATH=`which python3` \
     -DUSE_CUDA=ON \
     -DCUDA_TOOLKIT_ROOT_DIR=$CUDA_HOME \
-    -DCMAKE_INSTALL_PREFIX:PATH=../libtorch \
-    ../pytorch
+    -DCMAKE_INSTALL_PREFIX:PATH=/opt/libtorch \
+    ..
 
 #RUN cmake --build . --target install 
-RUN cmake --build . --target install 
+RUN cmake --build . --target install -- -j$(nproc)
 
 # Install FTorch
 WORKDIR /opt
