@@ -13,6 +13,7 @@ RUN apt-get update && \
     git \
     cmake \
     build-essential \
+    gfortran \
     wget \
     curl \
     unzip && \ 
@@ -37,24 +38,14 @@ RUN echo "source /opt/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
 # Install Pytorch
 RUN conda install -y pytorch pytorch-cuda=12.1 -c pytorch -c nvidia
 
-########################
-# Install GCC, Fortran #
-########################
-# Install GCC-9
-RUN apt remove -y gcc && apt update && apt install -y gcc-9 g++-9
-RUN ln -s /usr/bin/gcc-9 /usr/bin/gcc
-RUN ln -s /usr/bin/g++-9 /usr/bin/g++
-
-# Install Fortran
-# Build for source maybe if becomes outdated: https://gcc.gnu.org/wiki/GFortranBinaries#FromSource
-RUN apt install -y gfortran-9 
-RUN ln -s /usr/bin/gfortran-9 /usr/bin/gfortran
-
 #########################
 # Install Torch, FTorch #
 #########################
 
 # Need to build LibTorch from Source (https://github.com/pytorch/pytorch/blob/main/docs/libtorch.rst#building-libtorch-using-cmake)
+
+# Need pytorch version 2.1.2 after requiers modern version of gcc
+# https://github.com/pytorch/pytorch/archive/refs/tags/v2.1.2.tar.gz
 WORKDIR /opt 
 RUN git clone -b main --recurse-submodule https://github.com/pytorch/pytorch.git
 
