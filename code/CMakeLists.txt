@@ -4,7 +4,8 @@ cmake_policy (SET CMP0076 NEW)
 
 set(PROJECT_NAME ftorch_example)
 
-project(${PROJECT_NAME} LANGUAGES Fortran)
+# Enable Fortran and C++ languages
+project(${PROJECT_NAME} LANGUAGES Fortran CXX)
 
 # Build in Debug mode if not specified
 if(NOT CMAKE_BUILD_TYPE)

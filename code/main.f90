@@ -17,10 +17,10 @@ program inference
     character(len=128), dimension(:), allocatable :: args
 
     ! Set up Fortran data structures
-    integer, parameter :: array_len = 852
+    integer, parameter :: array_len = 5 
     real(wp) :: in_data(array_len)
 
-    real(wp), dimension(560), target :: out_data
+    real(wp), dimension(5), target :: out_data
 
     integer :: tensor_layout(1) = [1]
 
@@ -56,7 +56,11 @@ program inference
     call torch_tensor_from_array(out_tensors(1), out_data, tensor_layout, torch_kCPU)
 
     ! Run the model
-    call torch_model_forward(model, in_tensors, out_tensors)
+    !call torch_model_forward(model, in_tensors, out_tensors)
+
+    do i =1, 100000
+        call torch_model_forward(model, in_tensors, out_tensors)
+    end do
 
     write(*,*) out_data(:)
     call torch_model_delete(model)
