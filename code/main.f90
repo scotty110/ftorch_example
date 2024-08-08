@@ -11,23 +11,27 @@ program inference
 
     ! Set working precision for reals
     integer, parameter :: wp = dp
-    integer :: i
+    integer :: i, j, k, l
 
     integer :: num_args, ix
     character(len=128), dimension(:), allocatable :: args
 
     ! Set up Fortran data structures
-    integer, parameter :: array_len = 5 
-    real(wp) :: in_data(array_len)
+    integer, parameter :: x_dim1 = 70, x_dim2 = 3, x_dim3 = 2, x_dim4 = 2
+    integer, parameter :: l_dim1 = 3, l_dim2 = 2, l_dim3 = 2
+    real(wp), dimension(x_dim1, x_dim2, x_dim3, x_dim4) :: in_x
+    real(wp), dimension(l_dim1, l_dim2, l_dim3) :: landmass
 
-    real(wp), dimension(5), target :: out_data
+    real(wp), dimension(70, 2, 2, 2), target :: out_y
 
-    integer :: tensor_layout(1) = [1]
+    !integer :: tensor_layout(1) = [1]
+    integer :: tensor_layout_4d(4) = [4,3,2,1]
+    integer :: tensor_layout_3d(3) = [3,2,1]
 
     ! Set up Torch data structures
     ! The net, a vector of input tensors (in this case we only have one), and the output tensor
     type(torch_model) :: model
-    type(torch_tensor), dimension(1) :: in_tensors
+    type(torch_tensor), dimension(2) :: in_tensors
     type(torch_tensor), dimension(1) :: out_tensors
 
     ! Get TorchScript model file as a command line argument
@@ -37,34 +41,50 @@ program inference
         call get_command_argument(ix, args(ix))
     end do
 
-    ! Initialise data
-    do i = 1, array_len
-        in_data(i) = real(i, wp)
+    ! Initialize data
+    do i = 1, x_dim1
+        do j = 1, x_dim2
+            do k = 1, x_dim3
+                do l = 1, x_dim4
+                    in_x(i, j, k, l) = real(i + j + k + l, wp)
+                end do
+            end do
+        end do
+    end do
+
+    do i = 1, l_dim1
+        do j = 1, l_dim2
+            do k = 1, l_dim3
+                landmass(i, j, k) = real(i + j + k, wp)
+            end do
+        end do
     end do
 
     write(*,*) 'Loading model...'
 
     ! Load the Model
-    !call torch_model_load(model, args(1), torch_kCUDA, device_index=0) 
     call torch_model_load(model, args(1), torch_kCUDA)
 
-    write(*,*) 'Running inference...'
-
     ! Push data
-    !call torch_tensor_from_array(in_tensors(1), in_data, tensor_layout, torch_kCUDA, device_index=0)
-    call torch_tensor_from_array(in_tensors(1), in_data, tensor_layout, torch_kCUDA)
-    call torch_tensor_from_array(out_tensors(1), out_data, tensor_layout, torch_kCPU)
+    !call torch_tensor_from_array(in_tensors(1), in_x, tensor_layout, torch_kCUDA)
+    !call torch_tensor_from_array(in_tensors(2), landmass, tensor_layout, torch_kCUDA)
+    
+    call torch_tensor_from_array(in_tensors(1), in_x, tensor_layout_4d, torch_kCUDA)
+    call torch_tensor_from_array(in_tensors(2), landmass, tensor_layout_3d, torch_kCUDA)
 
+
+    !call torch_tensor_from_array(out_tensors(1), out_y, tensor_layout, torch_kCPU)
+    call torch_tensor_from_array(out_tensors(1), out_y, tensor_layout_4d, torch_kCPU)
+
+    write(*,*) 'Running inference...'
     ! Run the model
-    !call torch_model_forward(model, in_tensors, out_tensors)
-
-    do i =1, 100000
+    do i = 1, 100000
         call torch_model_forward(model, in_tensors, out_tensors)
     end do
 
-    write(*,*) out_data(:)
     call torch_model_delete(model)
     call torch_tensor_delete(in_tensors(1))
+    call torch_tensor_delete(in_tensors(2))
     call torch_tensor_delete(out_tensors(1))
 
 end program inference
