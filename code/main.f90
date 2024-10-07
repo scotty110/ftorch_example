@@ -17,14 +17,13 @@ program inference
     character(len=128), dimension(:), allocatable :: args
 
     ! Set up Fortran data structures
-    integer, parameter :: x_dim1 = 70, x_dim2 = 3, x_dim3 = 2, x_dim4 = 2
-    integer, parameter :: l_dim1 = 3, l_dim2 = 2, l_dim3 = 2
+    integer, parameter :: x_dim1 = 1, x_dim2 = 70, x_dim3 = 3, x_dim4 = 4 
+    integer, parameter :: l_dim1 = 1, l_dim2 = 3, l_dim3 = 4 
     real(wp), dimension(x_dim1, x_dim2, x_dim3, x_dim4) :: in_x
     real(wp), dimension(l_dim1, l_dim2, l_dim3) :: landmass
 
-    real(wp), dimension(70, 2, 2, 2), target :: out_y
+    real(wp), dimension(1, 70, 3, 4), target :: out_y
 
-    !integer :: tensor_layout(1) = [1]
     integer :: tensor_layout_4d(4) = [4,3,2,1]
     integer :: tensor_layout_3d(3) = [3,2,1]
 
@@ -66,14 +65,9 @@ program inference
     call torch_model_load(model, args(1), torch_kCUDA)
 
     ! Push data
-    !call torch_tensor_from_array(in_tensors(1), in_x, tensor_layout, torch_kCUDA)
-    !call torch_tensor_from_array(in_tensors(2), landmass, tensor_layout, torch_kCUDA)
-    
     call torch_tensor_from_array(in_tensors(1), in_x, tensor_layout_4d, torch_kCUDA)
     call torch_tensor_from_array(in_tensors(2), landmass, tensor_layout_3d, torch_kCUDA)
 
-
-    !call torch_tensor_from_array(out_tensors(1), out_y, tensor_layout, torch_kCPU)
     call torch_tensor_from_array(out_tensors(1), out_y, tensor_layout_4d, torch_kCPU)
 
     write(*,*) 'Running inference...'

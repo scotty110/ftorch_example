@@ -12,7 +12,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
 endif()
 
-set(CMAKE_PREFIX_PATH "/opt/libtorch")
+set(CMAKE_PREFIX_PATH " /usr/local/libtorch")
 
 find_package(FTorch)
 message(STATUS "Building with Fortran PyTorch coupling")
