@@ -10,11 +10,9 @@
 ## Container
 Here is where the different nvidia containers can be [found](https://hub.docker.com/u/nvidia) 
 
-## Code
-### 
+
 
 ## Links
-https://github.com/WillyChap/CAM/blob/ftorch_forpy_cam_rel60/src/physics/cam/DAMLcnn.F90
-Libtorch: https://pytorch.org/
-https://github.com/Cambridge-ICCS/FTorch
+[Libtorch](https://pytorch.org/) 
+[FTorch](https://github.com/Cambridge-ICCS/FTorch)
 
